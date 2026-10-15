@@ -1,0 +1,615 @@
+<!doctype html>
+<!-- lang is set so screen readers pick the right pronunciation (SC 3.1.1) -->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Access Studio: keyboard, voice, themes and WCAG 2.1 practice</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+<style>
+/* Colors live in tokens so every theme is checked once: text 4.5:1+, UI borders 3:1+ */
+:root{--bg:#f2f5f8;--fg:#14202b;--card:#fff;--mut:#46525e;--ac:#0b5c63;--acfg:#fff;--bd:#6b7886;--ok:#0a6b2e;--bad:#a4170f;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme=dark]{--bg:#0f1720;--fg:#e8eef4;--card:#17222d;--mut:#b3bfcb;--ac:#6fd0d8;--acfg:#08262a;--bd:#8a98a6;--ok:#6fdc96;--bad:#ff9a92}
+:root[data-theme=contrast]{--bg:#000;--fg:#fff;--card:#000;--mut:#fff;--ac:#ffee00;--acfg:#000;--bd:#fff;--ok:#00ff7f;--bad:#ff7b72}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font:1rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+[hidden]{display:none!important}
+/* Visible focus on everything (SC 2.4.7); never removed without a replacement */
+:focus-visible{outline:var(--fw,3px) solid var(--fg);outline-offset:3px}
+.skip{position:absolute;left:.5rem;top:-4rem;background:var(--ac);color:var(--acfg);padding:.7rem 1rem;z-index:9}
+.skip:focus{top:.5rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+header,main,footer{max-width:62rem;margin:0 auto;padding:1rem}
+h1{font:700 2rem/1.2 Georgia,"Times New Roman",serif;margin:.2rem 0}
+h2{font:700 1.5rem/1.3 Georgia,serif;margin:.5rem 0 1rem}
+h3{font-size:1.15rem;margin:1.5rem 0 .5rem}
+p,li{max-width:70ch}
+.row{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+[role=tablist]{display:flex;flex-wrap:wrap;gap:.25rem;border-bottom:3px solid var(--bd);margin-top:1rem}
+[role=tab]{min-height:2.75rem;padding:.5rem 1rem;border:2px solid var(--bd);border-bottom:0;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+[role=tab][aria-selected=true]{background:var(--ac);color:var(--acfg);font-weight:700;border-color:var(--ac)}
+.card{background:var(--card);border:2px solid var(--bd);padding:1rem;margin:1rem 0}
+.btn,button,select,input[type=text],input[type=email],input[type=color]{font:inherit;min-height:2.75rem}
+.btn,button.btn{background:var(--ac);color:var(--acfg);border:2px solid var(--ac);padding:.5rem 1rem;cursor:pointer}
+button:not(.btn):not([role=tab]){background:var(--card);color:var(--fg);border:2px solid var(--bd);padding:.5rem 1rem;cursor:pointer}
+input[type=text],input[type=email],select{background:var(--card);color:var(--fg);border:2px solid var(--bd);padding:.4rem .6rem}
+input[type=color]{width:3.5rem;padding:.1rem;border:2px solid var(--bd);background:var(--card)}
+input[type=checkbox],input[type=radio]{width:1.4rem;height:1.4rem;vertical-align:middle}
+label{display:inline-block}
+.field{margin:.75rem 0}.field label{display:block;font-weight:600}
+.err{color:var(--bad);font-weight:600}
+.toast{min-height:2.75rem;border:2px dashed var(--bd);padding:.5rem;margin-top:.75rem}
+.acc button{display:block;width:100%;text-align:left}
+.acc [role=region]{padding:.75rem;border:2px solid var(--bd);border-top:0}
+.menu{position:absolute;background:var(--card);border:2px solid var(--bd);padding:.25rem;z-index:5;min-width:11rem}
+.menu button{display:block;width:100%;text-align:left;border:0!important}
+dialog{background:var(--card);color:var(--fg);border:3px solid var(--fg);max-width:26rem}
+dialog::backdrop{background:rgba(0,0,0,.7)}
+pre{background:var(--card);border:2px solid var(--bd);padding:.75rem;overflow-x:auto;white-space:pre-wrap}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+.klog{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem;padding-left:1.2rem}
+.wrap{overflow:auto;border:2px solid var(--bd);background:var(--card);padding:.5rem}
+table.t{border-collapse:collapse;width:100%}.t th,.t td{border:1px solid var(--bd);padding:.4rem;text-align:left}
+.pf{font-weight:700}
+.pv{padding:1rem;border:2px solid var(--bd);margin:.75rem 0}
+fieldset{border:2px solid var(--bd);margin:.75rem 0}
+progress{width:100%;height:1.2rem}
+/* Sample UI (fixed light surface so Before/After compare fairly in any theme) */
+.sm{background:#fff;color:#111;padding:1rem;font-size:1em}
+.sm h2{font-size:1.4em;margin:.2em 0}.sm h3,.sm h5{font-size:1.1em}
+.sm.good{font-size:1em;max-width:100%}.sm.good *{max-width:100%}
+.sm.good p{color:#444}.sm.good a{color:#0a4fa3}
+.sm.good button{background:#0b5c63;color:#fff;border:2px solid #0b5c63;padding:.4em .9em;min-height:2.75rem;cursor:pointer}
+.sm.good input{border:2px solid #555;padding:.4em;background:#fff;color:#111;min-height:2.75rem}
+.sm.good label{display:block;font-weight:600}
+.sm.good .er{color:#a4170f;font-weight:600;display:block}
+.sm.good :focus-visible{outline:3px solid #0a4fa3;outline-offset:2px}
+.sm.good td,.sm.good th{border:1px solid #555;padding:.3em}
+.sm.bad{width:600px;font-size:14px}
+.bad .hd{display:flex;justify-content:space-between}
+.bad .lc{color:#aaa}.bad a{color:#7ab}
+.bad *:focus{outline:none}
+.bad .clk{display:inline-block;background:#2b7a82;color:#fff;padding:8px 14px;cursor:pointer}
+.bad input{border:1px solid #ddd;padding:6px}.bad .redb{border:2px solid #d33}
+.bad td{border:1px solid #ccc;padding:4px}
+.sp *{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}.sp p{margin-bottom:2em!important}
+
+/* ===== Advanced: extra themes (all text 4.5:1+, borders 3:1+) ===== */
+:root[data-theme=sepia]{--bg:#f4ecd8;--fg:#2b2216;--card:#fffaf0;--mut:#5a4a36;--ac:#7a3e00;--acfg:#fff;--bd:#7a6a55;--ok:#1f6b2a;--bad:#a4170f}
+:root[data-theme=lavender]{--bg:#f1eefc;--fg:#1d1633;--card:#fff;--mut:#4a4266;--ac:#5b3cc4;--acfg:#fff;--bd:#6f6891;--ok:#0a6b2e;--bad:#a4170f}
+:root[data-theme=ocean]{--bg:#06182b;--fg:#e6f3ff;--card:#0d2742;--mut:#b5cde3;--ac:#5cc8ff;--acfg:#03223a;--bd:#7fa3c4;--ok:#6fdc96;--bad:#ff9a92}
+:root[data-theme=forest]{--bg:#10200f;--fg:#eaf5e4;--card:#182c17;--mut:#bcd3b3;--ac:#9be37a;--acfg:#0c1f0a;--bd:#87a67c;--ok:#7fe39a;--bad:#ff9a92}
+:root[data-theme=sunset]{--bg:#2a1220;--fg:#fff0e6;--card:#3a1a2c;--mut:#f0cbb8;--ac:#ffb36b;--acfg:#2a1220;--bd:#c99a9a;--ok:#7fe39a;--bad:#ff9a92}
+:root[data-theme=butterflies]{--bg:#070b18;--fg:#eef2ff;--card:rgba(14,20,42,.84);--mut:#c3cbe6;--ac:#ff8ad8;--acfg:#1a0620;--bd:#9aa6d6;--ok:#6fdc96;--bad:#ff9a92}
+:root[data-theme=butterflies] body{background:radial-gradient(ellipse at 20% 10%,#1b1240 0,#070b18 55%,#02040c 100%) fixed}
+:root[data-theme=butterflies] dialog,:root[data-theme=butterflies] .menu{background:#10162c}
+#bfly{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:none}
+:root[data-theme=butterflies] #bfly{display:block}
+/* ===== Advanced: personalization variables ===== */
+html{font-size:var(--fs,100%)}
+body{font-family:var(--ff,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif);line-height:var(--lh,1.6);letter-spacing:var(--ls,0);word-spacing:var(--ws,0)}
+h1,h2{font-family:var(--hf,Georgia,"Times New Roman",serif)}
+header,main,footer{max-width:var(--mw,62rem);position:relative;z-index:1}
+main{filter:var(--flt,none)}
+.hl a{background:#ffee00;color:#000!important;text-decoration:underline;padding:0 .15em}
+.bigcur,.bigcur *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M4 2l30 20-13 3 8 16-6 3-8-16-9 9z' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E") 4 2,auto!important}
+.rm *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+#ruler{position:fixed;left:0;right:0;height:2.2rem;pointer-events:none;z-index:8;background:rgba(255,238,0,.2);border-top:2px solid var(--ac);border-bottom:2px solid var(--ac);display:none}
+.pres{display:flex;flex-wrap:wrap;gap:.5rem}
+textarea{font:inherit;width:100%;background:var(--card);color:var(--fg);border:2px solid var(--bd);padding:.5rem}
+@media print{#bfly,#ruler{display:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{header,.noprint,[role=tablist],.skip,footer{display:none!important}body{background:#fff;color:#000}}
+
+/* ===== Google-style UI (Material look: roomy, rounded, blue accent) ===== */
+:root[data-theme=light]{--bg:#f8f9fa;--fg:#202124;--card:#fff;--mut:#5f6368;--ac:#1967d2;--acfg:#fff;--bd:#80868b;--ln:#dadce0;--ok:#137333;--bad:#c5221f}
+:root[data-theme=dark]{--bg:#202124;--fg:#e8eaed;--card:#292a2d;--mut:#9aa0a6;--ac:#8ab4f8;--acfg:#202124;--bd:#9aa0a6;--ln:#3c4043;--ok:#81c995;--bad:#f28b82}
+:root{padding:0;--r:12px;--g:"Google Sans",Roboto,"Segoe UI",Arial,sans-serif}
+body{font-family:var(--ff,var(--g))}
+h1,h2,h3,h4{font-family:var(--hf,var(--g));font-weight:500}h1,h2{font-weight:400}
+h1{font-size:1.5rem;display:flex;align-items:center;gap:.6rem}h2{font-size:1.375rem}
+header{max-width:none;padding:0;background:var(--card);border-bottom:1px solid var(--ln,var(--bd))}
+.in{max-width:var(--mw,62rem);margin:0 auto;padding:max(.75rem,env(safe-area-inset-top)) 1rem 0}
+.logo{width:1.75rem;height:1.75rem;flex:none}
+.pill{display:flex;gap:.5rem;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:.2rem .25rem .2rem 1.25rem;margin:.5rem 0;max-width:36rem}
+.pill input[type=text]{flex:1;min-width:0;border:0;background:transparent}
+[role=tablist]{flex-wrap:nowrap;overflow-x:auto;gap:0;border:0;margin:.5rem 0 0;scrollbar-width:thin}
+[role=tab]{border:0;border-bottom:3px solid transparent;background:transparent;color:var(--mut);white-space:nowrap;font-weight:500;padding:.5rem 1rem}
+[role=tab][aria-selected=true]{background:transparent;color:var(--ac);border-color:transparent;border-bottom-color:var(--ac)}
+main{padding-top:1.5rem}
+.card{border:1px solid var(--ln,var(--bd));border-radius:var(--r);padding:1.25rem}
+.btn,button.btn{border-radius:999px;padding:.5rem 1.5rem;font-weight:500}
+button:not(.btn):not([role=tab]){border:1px solid var(--ln,var(--bd));border-radius:999px;background:transparent;color:var(--ac);padding:.5rem 1.25rem;font-weight:500}
+.acc button,.menu button{color:var(--fg)!important;border-radius:8px}
+.acc button{border:1px solid var(--ln,var(--bd));margin-top:.25rem}
+.acc [role=region]{border:1px solid var(--ln,var(--bd));border-radius:0 0 8px 8px}
+.menu{border-radius:8px;border:1px solid var(--ln,var(--bd));box-shadow:0 2px 8px rgba(0,0,0,.25)}
+input[type=text],input[type=email],select,textarea{border:1px solid var(--bd);border-radius:8px}
+input[type=checkbox],input[type=radio],input[type=range]{accent-color:var(--ac)}
+[aria-invalid=true]{border:2px solid var(--bad)!important}
+.err{font-weight:500}.field .err:not(:empty)::before{content:"\26A0  "}
+dialog{border:1px solid var(--ln,var(--bd));border-radius:28px;padding:1.5rem}
+.toast,.wrap,pre,fieldset{border:1px solid var(--ln,var(--bd));border-radius:8px}
+.snack{position:fixed;left:1rem;right:1rem;bottom:max(1rem,env(safe-area-inset-bottom));max-width:34rem;z-index:20;display:flex;gap:1rem;align-items:center;justify-content:space-between;background:#303134;color:#e8eaed;border-radius:8px;padding:.5rem 1rem;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.snack.e{border-left:6px solid #f28b82}
+.snack button{background:transparent!important;color:#8ab4f8!important;border:0!important}
+/* ===== Visible bounding box on hover and on click/focus for every control (SC 2.4.7, 1.4.11) ===== */
+button:hover,input:hover,textarea:hover,select:hover,summary:hover,[role=tab]:hover,.pill:hover{outline:2px solid var(--ac);outline-offset:3px}
+button:focus,input:focus,textarea:focus,select:focus,summary:focus,[role=tab]:focus,.pill:focus-within{outline:var(--fw,3px) solid var(--fg);outline-offset:3px}
+.pill input:hover,.pill input:focus{outline:none}
+.menu button:hover,.menu button:focus{outline-offset:-3px}
+.bad button:hover,.bad input:hover{outline:none}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<canvas id="bfly" aria-hidden="true"></canvas><div id="ruler" aria-hidden="true"></div>
+<header>
+ <div class="in">
+ <h1><svg class="logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.5" fill="#4285f4"/><circle cx="17" cy="7" r="4.5" fill="#ea4335"/><circle cx="7" cy="17" r="4.5" fill="#fbbc04"/><circle cx="17" cy="17" r="4.5" fill="#34a853"/></svg><span>Access Studio <span style="font-size:.5em;font-weight:400">WCAG workbench</span></span></h1>
+ <p>Practice keyboard and screen reader support, test contrast and magnification, and fix a broken UI for WCAG 2.1 AA.</p>
+ <form id="hform" class="pill" role="search"><label for="hq" class="sr">Run a command</label><input id="hq" type="text" placeholder="Run a command, for example dark mode" autocomplete="off"><button class="btn" type="submit">Run</button></form>
+ <div class="row"><label for="theme">Theme</label>
+  <select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="contrast">High contrast</option><option value="sepia">Sepia (warm paper)</option><option value="lavender">Lavender (soft light)</option><option value="ocean">Ocean (deep blue)</option><option value="forest">Forest (dark green)</option><option value="sunset">Sunset (dark warm)</option><option value="butterflies">Butterflies (dark, live background)</option></select></div>
+ <div role="tablist" aria-label="Lab modules" id="maintabs">
+  <button role="tab" id="t1" aria-controls="p1" aria-selected="true">1. Keyboard and ARIA</button>
+  <button role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1">2. Contrast and zoom</button>
+  <button role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1">3. Fix the UI</button>
+  <button role="tab" id="t4" aria-controls="p4" aria-selected="false" tabindex="-1">4. Audit report</button>
+  <button role="tab" id="t5" aria-controls="p5" aria-selected="false" tabindex="-1">5. Personalization</button>
+  <button role="tab" id="t6" aria-controls="p6" aria-selected="false" tabindex="-1">6. Voice commands</button>
+ </div>
+</div>
+</header>
+<main id="main" tabindex="-1">
+
+<section role="tabpanel" id="p1" aria-labelledby="t1">
+ <h2>Keyboard and screen reader lab</h2>
+ <p>Use only the keyboard here. Each card lists what to test and the ARIA it uses. Prefer native HTML; ARIA fills gaps native elements cannot.</p>
+
+ <div class="card"><h3>Tabs</h3>
+  <p><strong>Test:</strong> Tab to the module tabs above, then use Left, Right, Home and End. <strong>ARIA:</strong> tablist, tab, tabpanel, aria-selected, aria-controls, roving tabindex.</p></div>
+
+ <div class="card"><h3>Accordion</h3>
+  <p><strong>Test:</strong> Enter or Space on a heading button. <strong>ARIA:</strong> aria-expanded, aria-controls.</p>
+  <div class="acc">
+   <button id="ah1" aria-expanded="false" aria-controls="ap1">What is a focus indicator?</button>
+   <div id="ap1" role="region" aria-labelledby="ah1" hidden>The outline that shows where keyboard focus is (SC 2.4.7).</div>
+   <button id="ah2" aria-expanded="false" aria-controls="ap2">Why use a real button?</button>
+   <div id="ap2" role="region" aria-labelledby="ah2" hidden>Buttons get focus, Enter, Space and a role for free (SC 2.1.1, 4.1.2).</div>
+  </div></div>
+
+ <div class="card"><h3>Modal dialog</h3>
+  <p><strong>Test:</strong> Open it, press Tab (focus stays inside), press Esc (focus returns here). <strong>ARIA:</strong> native dialog with showModal() supplies the modal role, focus trap and Esc; aria-labelledby and aria-describedby name it.</p>
+  <button class="btn" id="openDlg">Open dialog</button>
+  <dialog id="dlg" aria-labelledby="dt" aria-describedby="dd"><h4 id="dt">Confirm</h4><p id="dd">Focus is trapped in this dialog until you close it.</p>
+   <button class="btn" id="closeDlg">Close</button> <button id="other">Another control</button></dialog></div>
+
+ <div class="card"><h3>Menu button</h3>
+  <p><strong>Test:</strong> Enter or Down Arrow opens; Up, Down, Home, End move; Esc closes and returns focus. <strong>ARIA:</strong> aria-haspopup, aria-expanded, menu, menuitem.</p>
+  <div style="position:relative;display:inline-block">
+   <button id="menubtn" aria-haspopup="menu" aria-expanded="false" aria-controls="menulist">Actions</button>
+   <div id="menulist" class="menu" role="menu" aria-labelledby="menubtn" hidden>
+    <button role="menuitem" tabindex="-1">Copy</button><button role="menuitem" tabindex="-1">Rename</button><button role="menuitem" tabindex="-1">Delete</button></div></div></div>
+
+ <div class="card"><h3>Form with validation</h3>
+  <p><strong>Test:</strong> Submit empty. Focus moves to the error summary; each link jumps to its field. <strong>ARIA:</strong> aria-required, aria-invalid, aria-describedby, role=status.</p>
+  <div id="esum" class="err" tabindex="-1" hidden></div>
+  <form id="frm" novalidate>
+   <div class="field"><label for="fname">Name (required)</label><input id="fname" type="text" aria-required="true" aria-describedby="fname-err" autocomplete="name"><div id="fname-err" class="err"></div></div>
+   <div class="field"><label for="femail">Email (required)</label><input id="femail" type="email" aria-required="true" aria-describedby="femail-err" autocomplete="email"><div id="femail-err" class="err"></div></div>
+   <button class="btn" type="submit">Send</button></form>
+  <div id="status" class="toast" role="status"></div></div>
+
+ <div class="card"><h3>Keyboard event log</h3>
+  <p>Shows each key and the focused element, so you can check focus order (SC 2.4.3).</p>
+  <ol id="klog" class="klog" aria-label="Recent key events"></ol></div>
+</section>
+
+<section role="tabpanel" id="p2" aria-labelledby="t2" hidden>
+ <h2>Contrast and magnification tester</h2>
+ <div class="card"><h3>Contrast checker</h3>
+  <div class="row">
+   <div><label for="fgc">Text color</label><br><input type="color" id="fgc" value="#767676"> <input type="text" id="fgh" value="#767676" aria-label="Text color hex" size="8"></div>
+   <div><label for="bgc">Background color</label><br><input type="color" id="bgc" value="#ffffff"> <input type="text" id="bgh" value="#ffffff" aria-label="Background color hex" size="8"></div>
+  </div>
+  <div id="cerr" class="err" role="status"></div>
+  <p><strong>Ratio: <span id="ratio"></span>:1</strong> (shown rounded down, never up)</p>
+  <ul id="results"></ul>
+  <div class="pv" id="pv"><p style="margin:0;font-size:1rem">Normal text sample</p><p style="margin:0;font-size:1.5rem">Large text sample (24px)</p><p style="margin:0;font-size:1.167rem;font-weight:700">Large bold sample (18.66px bold)</p></div>
+  <button id="sugg">Suggest a passing text color (4.5:1)</button> <span id="sugout" role="status"></span>
+  <p>Large text means at least 24px regular or 18.66px bold. The suggestion blends your text color toward black or white until the target is met, which keeps the hue.</p></div>
+
+ <div class="card"><h3>Magnification, reflow and color vision</h3>
+  <div class="row">
+   <label for="ver">Sample</label><select id="ver"><option value="g">After (fixed)</option><option value="b">Before (broken)</option></select>
+   <label for="zoom">Text size <output id="zo">100%</output></label><input type="range" id="zoom" min="100" max="400" step="25" value="100">
+   <label for="cb">Color vision</label><select id="cb"><option value="">Normal</option><option value="pro">Protanopia</option><option value="deu">Deuteranopia</option><option value="tri">Tritanopia</option><option value="ach">Achromatopsia</option></select>
+  </div>
+  <div class="row"><label><input type="checkbox" id="rf"> Reflow at 320px (SC 1.4.10)</label><label><input type="checkbox" id="sp"> Text spacing (SC 1.4.12)</label></div>
+  <p id="mres" role="status"></p>
+  <div class="wrap"><div id="stage"></div></div>
+  <p>SC 1.4.4 asks that text resize to 200% without loss of content or function. This is a simulation: also test with browser zoom, the OS magnifier, and a screen reader such as NVDA, JAWS or VoiceOver.</p></div>
+</section>
+
+<section role="tabpanel" id="p3" aria-labelledby="t3" hidden>
+ <h2>WCAG 2.1 remediation workshop</h2>
+ <fieldset><legend>View</legend>
+  <label><input type="radio" name="view" value="b" checked> Before</label>
+  <label><input type="radio" name="view" value="a"> After</label>
+  <label><input type="radio" name="view" value="s"> Side by side</label></fieldset>
+ <div class="row" style="align-items:flex-start">
+  <div id="wb" class="wrap" style="flex:1 1 20rem"></div>
+  <div id="wa" class="wrap" style="flex:1 1 20rem" hidden></div></div>
+ <p id="prog" role="status"></p><progress id="pbar" max="14" value="0" aria-label="Issues found"></progress>
+ <h3>Issue tracker</h3><div id="issues"></div>
+</section>
+
+<section role="tabpanel" id="p4" aria-labelledby="t4" hidden>
+ <h2>Audit report and checklist</h2>
+ <div class="card"><h3>How to test</h3>
+  <p>Keyboard only: Tab, Shift+Tab, Enter, Space, arrows, Esc. Screen readers: NVDA with Firefox or Chrome, VoiceOver with Safari, TalkBack on Android. Also check zoom to 200%, contrast tools, and automated scanners (axe DevTools, Lighthouse, WAVE). Automated tools find only a portion of WCAG issues, so manual testing is required.</p></div>
+ <div class="card"><h3>HTML scanner</h3>
+  <p>Paste a snippet of HTML to check for common WCAG failures. It only finds what can be computed from markup, so it never replaces manual testing.</p>
+  <div class="field"><label for="scin">HTML to scan</label><textarea id="scin" rows="6"></textarea></div>
+  <div class="row"><button class="btn" type="button" id="scgo">Scan HTML</button><button type="button" id="scload">Load the broken sample</button></div>
+  <p id="scsum" role="status"></p><ul id="scout"></ul></div>
+ <div id="chk"></div>
+ <div class="row noprint"><button class="btn" id="gen">Generate report</button><button id="cpy">Copy report as text</button><button id="dl">Download report</button><button id="prt">Print</button></div>
+ <pre id="rep" tabindex="-1" aria-live="off">Choose Generate report to build a summary.</pre><p id="cpst" role="status"></p>
+</section>
+
+<section role="tabpanel" id="p5" aria-labelledby="t5" hidden>
+ <h2>Personalization</h2>
+ <p>Every change applies instantly to the whole lab and is saved in this browser. Theme is chosen with the selector at the top.</p>
+ <div class="card"><h3>Presets</h3><div class="pres">
+  <button type="button" data-p="lowvision">Low vision</button><button type="button" data-p="dyslexia">Dyslexia friendly</button>
+  <button type="button" data-p="calm">Calm and low motion</button><button type="button" id="preset-reset" class="btn">Reset everything</button></div>
+  <p id="pst" role="status"></p></div>
+ <div id="pctl"></div><p id="acm" role="status"></p>
+ <div class="card"><h3>Backup your settings</h3>
+  <div class="field"><label for="pjson">Settings as JSON</label><textarea id="pjson" rows="4" aria-describedby="pjson-err"></textarea><div id="pjson-err" class="err"></div></div>
+  <div class="row"><button type="button" id="pshow">Show current settings</button><button type="button" id="papp">Apply settings from box</button></div></div>
+</section>
+
+<section role="tabpanel" id="p6" aria-labelledby="t6" hidden>
+ <h2>Voice commands</h2>
+ <div class="card"><h3>Microphone</h3>
+  <p id="vsup"></p>
+  <div class="row"><button type="button" class="btn" id="vmic" aria-pressed="false">Start listening</button>
+   <label for="vlang">Language</label><select id="vlang"><option>en-US</option><option>en-GB</option><option>en-IN</option></select>
+   <label><input type="checkbox" id="vfb"> Speak replies aloud</label></div>
+  <p>Shortcuts: <kbd>Alt</kbd>+<kbd>V</kbd> turns the microphone on or off; <kbd>Alt</kbd>+<kbd>1</kbd> to <kbd>6</kbd> jump to a tab.</p>
+  <p><span id="vint" aria-hidden="true"></span></p>
+  <div id="vlive" class="toast">Not listening.</div></div>
+ <div class="card"><h3>Type a command</h3>
+  <p>Works without a microphone, and is useful if your browser blocks mic access inside embedded pages.</p>
+  <form id="vform" class="row"><label for="vtxt">Command</label><input type="text" id="vtxt" size="30" autocomplete="off"><button class="btn" type="submit">Run</button></form></div>
+ <div class="card"><h3>Command log</h3><ol id="vlog" aria-label="Recent commands"></ol></div>
+ <div class="card"><h3>What you can say</h3><div class="wrap"><table class="t"><caption>Available voice commands</caption><thead><tr><th scope="col">Action</th><th scope="col">Examples</th></tr></thead><tbody id="vhelp"></tbody></table></div></div>
+</section>
+</main>
+<footer><p>Limits: this app cannot replace testing with real assistive technology, and its scanners check only what they can compute.</p></footer>
+
+<div id="snack" class="snack" hidden><span id="snackm"></span><button type="button" id="snackx">Dismiss</button></div><div class="sr" role="status" id="live"></div><div class="sr" role="alert" id="liveE"></div>
+<!-- SVG color vision filters, applied to the sample with CSS filter:url() -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<filter id="pro"><feColorMatrix type="matrix" values="0.567 0.433 0 0 0 0.558 0.442 0 0 0 0 0.242 0.758 0 0 0 0 0 1 0"/></filter>
+<filter id="deu"><feColorMatrix type="matrix" values="0.625 0.375 0 0 0 0.7 0.3 0 0 0 0 0.3 0.7 0 0 0 0 0 1 0"/></filter>
+<filter id="tri"><feColorMatrix type="matrix" values="0.95 0.05 0 0 0 0 0.433 0.567 0 0 0 0.475 0.525 0 0 0 0 0 1 0"/></filter>
+<filter id="ach"><feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0 0 0 1 0"/></filter>
+</defs></svg>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const TE=(h)=>String(h).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* Errors: every failure gets plain words and a next step; nothing fails silently */
+let tt,ge=0;function toast(m,err){const sn=$('#snack');if(!sn)return;$('#snackm').textContent=m;sn.classList.toggle('e',!!err);sn.hidden=false;const L=$(err?'#liveE':'#live');L.textContent='';setTimeout(()=>L.textContent=m,60);clearTimeout(tt);if(!err)tt=setTimeout(()=>sn.hidden=true,8000);}
+$('#snackx').onclick=()=>{$('#snack').hidden=true;};
+function onErr(m){console.error(m);if(/ResizeObserver/.test(m)||ge++>2)return;toast('Something went wrong ('+m+'). Try again. If it keeps happening, choose Reset everything in Personalization.',true);}
+addEventListener('error',e=>onErr(e.message||'unknown error'));
+addEventListener('unhandledrejection',e=>onErr((e.reason&&e.reason.message)||String(e.reason)));
+/* Theme: start from the OS preference, then let the native select decide */
+const ts=$('#theme');ts.value=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+function setTheme(){document.documentElement.dataset.theme=ts.value;try{localStorage.setItem('a11y-lab-theme',ts.value)}catch(e){}window.onTheme&&window.onTheme(ts.value);}
+ts.onchange=setTheme;try{const sv=localStorage.getItem('a11y-lab-theme');if(sv&&[...ts.options].some(o=>o.value===sv))ts.value=sv}catch(e){}document.documentElement.dataset.theme=ts.value;
+
+/* Tabs: roving tabindex so the tablist is one Tab stop; arrows move inside it */
+const tabs=$$('[role=tab]');
+function selTab(t){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);x.tabIndex=on?0:-1;$('#'+x.getAttribute('aria-controls')).hidden=!on;});try{t.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}}
+tabs.forEach(t=>t.onclick=()=>selTab(t));
+$('#maintabs').addEventListener('keydown',e=>{const i=tabs.indexOf(document.activeElement);if(i<0)return;let n=-1;
+ if(e.key==='ArrowRight')n=(i+1)%tabs.length;else if(e.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=tabs.length-1;
+ if(n>-1){e.preventDefault();tabs[n].focus();selTab(tabs[n]);}});
+
+/* Polite live region: clear first so repeated messages are still announced */
+function say(m){const s=$('#status');s.textContent='';setTimeout(()=>s.textContent=m,60);}
+
+/* Accordion */
+$$('.acc button').forEach(b=>b.onclick=()=>{const o=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!o));$('#'+b.getAttribute('aria-controls')).hidden=o;});
+
+/* Modal: native <dialog>.showModal() traps focus and handles Esc; we restore focus explicitly */
+const dlg=$('#dlg'),op=$('#openDlg');op.onclick=()=>dlg.showModal();$('#closeDlg').onclick=()=>dlg.close();dlg.addEventListener('close',()=>op.focus());
+
+/* Menu button pattern from the ARIA Authoring Practices Guide */
+const mb=$('#menubtn'),ml=$('#menulist'),mi=$$('[role=menuitem]',ml);
+function openM(i){ml.hidden=false;mb.setAttribute('aria-expanded','true');mi[i].focus();}
+function closeM(f){ml.hidden=true;mb.setAttribute('aria-expanded','false');if(f)mb.focus();}
+mb.onclick=()=>ml.hidden?openM(0):closeM(true);
+mb.onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();openM(0);}else if(e.key==='ArrowUp'){e.preventDefault();openM(mi.length-1);}};
+ml.onkeydown=e=>{const i=mi.indexOf(document.activeElement);let n=-1;
+ if(e.key==='ArrowDown')n=(i+1)%mi.length;else if(e.key==='ArrowUp')n=(i-1+mi.length)%mi.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=mi.length-1;
+ else if(e.key==='Escape'){closeM(true);return;}else if(e.key==='Tab'){closeM(false);return;}
+ if(n>-1){e.preventDefault();mi[n].focus();}};
+mi.forEach(m=>m.onclick=()=>{closeM(true);say('Chose: '+m.textContent);});
+
+/* Form: errors are text (not color only), tied to fields, and summarized with focus */
+const FM={fname:v=>v.trim()?'':'Enter your name.',femail:v=>!v.trim()?'Enter an email address.':/^\S+@\S+\.\S+$/.test(v.trim())?'':'Enter an email address like name@example.com.'};
+function chk(id){const f=$('#'+id),m=FM[id](f.value);f.setAttribute('aria-invalid',String(!!m));$('#'+id+'-err').textContent=m?'Error: '+m:'';return m;}
+function sumErr(){const er=Object.keys(FM).filter(id=>$('#'+id).getAttribute('aria-invalid')==='true').map(id=>[id,FM[id]($('#'+id).value)]),sm=$('#esum');
+ if(!er.length){sm.hidden=true;return er;}
+ sm.innerHTML='<h4>'+er.length+(er.length>1?' problems':' problem')+' to fix</h4><ul>'+er.map(([id,m])=>'<li><a href="#'+id+'">'+TE(m)+'</a></li>').join('')+'</ul>';sm.hidden=false;return er;}
+$('#frm').onsubmit=e=>{e.preventDefault();Object.keys(FM).forEach(chk);if(sumErr().length)$('#esum').focus();else{say('Form sent.');$('#frm').reset();}};
+Object.keys(FM).forEach(id=>{const f=$('#'+id),re=()=>{chk(id);if(!$('#esum').hidden)sumErr();};f.addEventListener('blur',()=>{if(f.value||f.getAttribute('aria-invalid')==='true')re();});f.addEventListener('input',()=>{if(f.getAttribute('aria-invalid')==='true')re();});});
+$('#esum').onclick=e=>{if(e.target.tagName==='A'){e.preventDefault();$(e.target.getAttribute('href')).focus();}};
+
+/* Keyboard event log and the deliberate keyboard trap used by the Before sample */
+const klog=$('#klog');
+function nm(el){return (el.getAttribute&&el.getAttribute('aria-label'))||(el.labels&&el.labels[0]&&el.labels[0].textContent.trim())||(el.textContent||'').trim().slice(0,28);}
+document.addEventListener('keydown',e=>{const el=document.activeElement;
+ const li=document.createElement('li');li.textContent=e.key+' on <'+el.tagName.toLowerCase()+'>'+(el.getAttribute('role')?' role='+el.getAttribute('role'):'')+' "'+nm(el)+'"';
+ klog.prepend(li);while(klog.children.length>8)klog.lastChild.remove();
+ if(el.classList&&el.classList.contains('trap')){if(e.key==='Tab')e.preventDefault();if(e.key==='Escape')el.blur();}});
+
+/* ---------- Module 2: contrast math exactly as WCAG 2.x defines it ---------- */
+function norm(h){h=h.trim();if(/^[0-9a-f]{3}([0-9a-f]{3})?$/i.test(h))h='#'+h;if(/^#[0-9a-f]{3}$/i.test(h))h='#'+[...h.slice(1)].map(c=>c+c).join('');return /^#[0-9a-f]{6}$/i.test(h)?h.toLowerCase():null;}
+function lum(h){const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2];}
+function ratio(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+function mix(h,t,p){return '#'+[1,3,5].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*(1-p)+t*p).toString(16).padStart(2,'0')).join('');}
+function suggest(fg,bg,t){if(ratio(fg,bg)>=t)return fg;const to=lum(bg)>0.179?0:255;for(let k=1;k<=100;k++){const c=mix(fg,to,k/100);if(ratio(c,bg)>=t)return c;}return to?'#ffffff':'#000000';}
+const TESTS=[['Normal text AA',4.5],['Large text AA',3],['UI component or graphic AA (SC 1.4.11)',3],['Normal text AAA',7],['Large text AAA',4.5]];
+function pair(a,b,col){const pk=$('#'+a),tx=$('#'+b);pk.oninput=()=>{tx.value=pk.value;upd();};const re=()=>{$('#cerr').textContent=$$('#fgh,#bgh').some(x=>x.getAttribute('aria-invalid')==='true')?'Error: enter a hex color like #1a73e8 or #fff. Results still show the last valid colors.':'';};
+ tx.oninput=()=>{const n=norm(tx.value);if(n){tx.removeAttribute('aria-invalid');pk.value=n;upd();re();}};tx.onchange=()=>{if(!norm(tx.value))tx.setAttribute('aria-invalid','true');re();};}
+pair('fgc','fgh');pair('bgc','bgh');
+function upd(){const f=norm($('#fgh').value),b=norm($('#bgh').value);if(!f||!b)return;const r=ratio(f,b);
+ $('#ratio').textContent=(Math.floor(r*100)/100).toFixed(2);
+ $('#results').innerHTML=TESTS.map(([n,t])=>{const ok=r>=t;return '<li><span class="pf" style="color:var(--'+(ok?'ok':'bad')+')">'+(ok?'\u2714 Pass':'\u2716 Fail')+'</span> '+n+' (needs '+t+':1)</li>';}).join('');
+ $('#pv').style.cssText='color:'+f+';background:'+b;}
+upd();
+$('#sugg').onclick=()=>{const f=norm($('#fgh').value),b=norm($('#bgh').value);if(!f||!b){$('#sugout').textContent='Enter two valid hex colors first.';return;}
+ const s=suggest(f,b,4.5);$('#fgh').value=s;$('#fgc').value=s;upd();$('#sugout').textContent='Text color set to '+s+'.';};
+
+/* ---------- Sample UI: Before has 14 failures, After fixes each ---------- */
+const IMG="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Crect width='80' height='60' fill='%23c8a27a'/%3E%3C/svg%3E";
+/* Live validation for the fixed sample: empty or malformed shows the error, a valid address clears it */
+function vEm(el){const er=document.getElementById(el.id+'e'),v=el.value.trim(),m=!v?'Enter an email address.':/^\S+@\S+\.\S+$/.test(v)?'':'Enter a full email address like name@example.com.';
+ el.setAttribute('aria-invalid',String(!!m));if(er)er.textContent=m?'\u26A0 Error: '+m:'';}
+function sample(g,p){const add="document.getElementById('"+p+"st').textContent='Added to cart'";
+ if(g)return '<div class="sm good"><header style="padding:0;display:flex;justify-content:space-between;align-items:center"><h2>Brew &amp; Bean</h2><button type="button" aria-label="Search">\uD83D\uDD0D</button></header>'
+ +'<h3>Our beans</h3><img src="'+IMG+'" alt="Bag of medium-roast Ethiopian beans" width="80" height="60">'
+ +'<p>Small-batch coffee, roasted weekly. <a href="#" onclick="return false">Read our roasting guide</a></p>'
+ +'<button type="button" onclick="'+add+'">Add to cart</button> <span id="'+p+'st" role="status"></span>'
+ +'<form novalidate onsubmit="vEm(this.querySelector(\'input\'));return false"><label for="'+p+'e">Email</label><input id="'+p+'e" type="email" aria-invalid="true" aria-describedby="'+p+'ee" value="bob@" oninput="vEm(this)" onblur="vEm(this)"><span id="'+p+'ee" class="er">\u26A0 Error: enter a full email address.</span></form>'
+ +'<table><caption>Prices</caption><thead><tr><th scope="col">Bag</th><th scope="col">Price</th></tr></thead><tbody><tr><td>250 g</td><td>$9</td></tr></tbody></table></div>';
+ return '<div class="sm bad"><div class="hd"><h2>Brew &amp; Bean</h2><button type="button">\uD83D\uDD0D</button></div>'
+ +'<h5>Our beans</h5><img src="'+IMG+'">'
+ +'<p class="lc">Small-batch coffee, roasted weekly. To learn more <a href="#" onclick="return false" tabindex="5">click here</a></p>'
+ +'<div class="clk" onclick="'+add+'">Add to cart</div><span id="'+p+'st"></span>'
+ +'<form onsubmit="return false"><input class="redb" placeholder="Email" value="bob@"><br><br><input class="trap" value="Tab is trapped here. Press Esc to leave."></form>'
+ +'<table><tr><td>Bag</td><td>Price</td></tr><tr><td>250 g</td><td>$9</td></tr></table></div>';}
+
+/* Magnification stage */
+const stage=$('#stage');
+function renderStage(){stage.innerHTML=sample($('#ver').value==='g',$('#ver').value==='g'?'mg':'mb');applyStage();}
+function applyStage(){const z=+$('#zoom').value;$('#zo').textContent=z+'%';stage.style.fontSize=(16*z/100)+'px';
+ stage.style.width=$('#rf').checked?'320px':'';stage.classList.toggle('sp',$('#sp').checked);stage.style.filter=$('#cb').value?'url(#'+$('#cb').value+')':'';
+ const w=stage.parentElement;const scroll=stage.scrollWidth>w.clientWidth+1||$('#rf').checked&&stage.scrollWidth>322;
+ $('#mres').textContent=(scroll?'Warning: content scrolls horizontally here, which fails reflow (SC 1.4.10) when it happens at 320px or 400% zoom.':'No horizontal scrolling detected.')+($('#sp').checked?' Check the sample for clipped or overlapping text.':'');}
+['ver','zoom','rf','sp','cb'].forEach(id=>$('#'+id).addEventListener(id==='zoom'?'input':'change',id==='ver'?renderStage:applyStage));
+renderStage();
+
+/* ---------- Module 3: issue tracker ---------- */
+const IS=[
+['Low-contrast text','1.4.3','Contrast (Minimum)','AA','People with low vision, or anyone in bright light','Contrast checker: #aaa on white is about 2.3:1.','Use at least 4.5:1 for normal text.','<p style="color:#aaa">','<p style="color:#444">'],
+['Image without alt text','1.1.1','Non-text Content','A','Screen reader users','Inspect the img: no alt, so the file name may be read.','Describe meaningful images; use alt="" for decorative ones.','<img src="beans.png">','<img src="beans.png" alt="Bag of Ethiopian beans">'],
+['Clickable div','2.1.1','Keyboard','A','Keyboard, switch and screen reader users','Press Tab: the div never gets focus.','Use a native button.','<div onclick="add()">Add</div>','<button type="button" onclick="add()">Add</button>'],
+['Placeholder-only field','3.3.2','Labels or Instructions','A','Screen reader and cognitive-disability users','Type in the field: the hint disappears and there is no label.','Add a visible label tied with for and id.','<input placeholder="Email">','<label for="e">Email</label><input id="e">'],
+['Error shown by color only','1.4.1','Use of Color','A','Color-blind and low-vision users','Apply the achromatopsia filter: the red border is the only cue.','Add text and an icon, and link it with aria-describedby.','<input class="redb">','<input aria-invalid="true" aria-describedby="m"><span id="m">Error: ...</span>'],
+['No visible focus indicator','2.4.7','Focus Visible','AA','Keyboard users','Tab through: you cannot see where focus is.','Remove outline:none or provide a clear replacement.','*:focus{outline:none}',':focus-visible{outline:3px solid #0a4fa3}'],
+['Positive tabindex','2.4.3','Focus Order','A','Keyboard and screen reader users','Tab: the link with tabindex=5 is reached out of order.','Use tabindex 0 or -1 only and follow the DOM order.','<a tabindex="5">','<a href="#">'],
+['Skipped heading level','1.3.1','Info and Relationships','A','Screen reader users who navigate by headings','Headings list jumps from h2 to h5. (Strictly a best practice unless the structure is misrepresented.)','Use heading levels that reflect the outline.','<h2>..</h2><h5>..</h5>','<h2>..</h2><h3>..</h3>'],
+['Vague link text','2.4.4','Link Purpose (In Context)','A','Screen reader users who list links','Links list shows "click here".','Make the link text describe its destination.','<a>click here</a>','<a>Read our roasting guide</a>'],
+['Icon-only button without a name','4.1.2','Name, Role, Value','A','Screen reader and voice control users','Accessibility tree shows an empty name.','Add aria-label or visible text.','<button>\uD83D\uDD0D</button>','<button aria-label="Search">\uD83D\uDD0D</button>'],
+['Table without headers','1.3.1','Info and Relationships','A','Screen reader users','Cells are read with no column context.','Use th with scope, plus a caption.','<td>Bag</td>','<th scope="col">Bag</th>'],
+['Fixed pixel width','1.4.10','Reflow','AA','Low-vision users who zoom','Set 320px in Module 2: horizontal scroll appears.','Use max-width and relative units.','width:600px','max-width:100%'],
+['Status not announced','4.1.3','Status Messages','AA','Screen reader users','Press Add to cart: nothing is spoken.','Put the message in a role="status" region.','<span id="st"></span>','<span id="st" role="status"></span>'],
+['Keyboard trap','2.1.2','No Keyboard Trap','A','Keyboard users','Focus the last field and press Tab: focus never leaves. (Esc is the escape hatch here.)','Never intercept Tab without an exit.','onkeydown: Tab -> preventDefault','(no handler)']];
+$('#wb').innerHTML=sample(false,'b');$('#wa').innerHTML=sample(true,'a');
+$$('input[name=view]').forEach(r=>r.onchange=()=>{const v=$('input[name=view]:checked').value;$('#wb').hidden=v==='a';$('#wa').hidden=v==='b';});
+$('#issues').innerHTML=IS.map((x,i)=>'<article class="card"><h4>'+(i+1)+'. '+TE(x[0])+'</h4><p>SC '+x[1]+' '+x[2]+' (Level '+x[3]+')</p>'
+ +'<label><input type="checkbox" class="fnd"> Found<span class="sr">: '+TE(x[0])+'</span></label> <label><input type="checkbox"> Fixed<span class="sr">: '+TE(x[0])+'</span></label>'
+ +'<details><summary>Details and fix</summary><p><strong>Affects:</strong> '+TE(x[4])+'</p><p><strong>Detect:</strong> '+TE(x[5])+'</p><p><strong>Fix:</strong> '+TE(x[6])+'</p>'
+ +'<p>Before:</p><pre><code>'+TE(x[7])+'</code></pre><p>After:</p><pre><code>'+TE(x[8])+'</code></pre></details></article>').join('');
+function prog(){const n=$$('.fnd:checked').length;$('#prog').textContent=n+' of '+IS.length+' issues found';$('#pbar').value=n;}
+$('#issues').addEventListener('change',prog);prog();
+
+/* ---------- Module 4: checklist and report ---------- */
+const CK=[['Perceivable','1.1.1','Non-text Content'],['Perceivable','1.3.1','Info and Relationships'],['Perceivable','1.4.1','Use of Color'],['Perceivable','1.4.3','Contrast (Minimum)'],['Perceivable','1.4.4','Resize Text'],['Perceivable','1.4.10','Reflow'],['Perceivable','1.4.11','Non-text Contrast'],['Perceivable','1.4.12','Text Spacing'],
+['Operable','2.1.1','Keyboard'],['Operable','2.1.2','No Keyboard Trap'],['Operable','2.4.3','Focus Order'],['Operable','2.4.4','Link Purpose (In Context)'],['Operable','2.4.7','Focus Visible'],
+['Understandable','3.1.1','Language of Page'],['Understandable','3.3.1','Error Identification'],['Understandable','3.3.2','Labels or Instructions'],
+['Robust','4.1.2','Name, Role, Value'],['Robust','4.1.3','Status Messages']];
+$('#chk').innerHTML=['Perceivable','Operable','Understandable','Robust'].map(P=>'<h3>'+P+'</h3>'+CK.map((c,i)=>c[0]!==P?'':
+ '<fieldset><legend>SC '+c[1]+' '+c[2]+'</legend>'+['pass:Pass','fail:Fail','na:Not applicable'].map(o=>{const[v,l]=o.split(':');return '<label><input type="radio" name="c'+i+'" value="'+v+'"> '+l+'</label> ';}).join('')
+ +'<div class="field"><label for="n'+i+'">Notes for SC '+c[1]+'</label><input type="text" id="n'+i+'" style="width:100%"></div></fieldset>').join('')).join('');
+function report(){const L=['Access Studio audit report','Generated: '+new Date().toLocaleString(),''];const fails=[];
+ ['Perceivable','Operable','Understandable','Robust'].forEach(P=>{let p=0,f=0,na=0,u=0;
+  CK.forEach((c,i)=>{if(c[0]!==P)return;const v=($('input[name=c'+i+']:checked')||{}).value;if(v==='pass')p++;else if(v==='fail'){f++;fails.push('SC '+c[1]+' '+c[2]+': '+($('#n'+i).value||'(no notes)'));}else if(v==='na')na++;else u++;});
+  L.push(P+': '+p+' pass, '+f+' fail, '+na+' n/a, '+u+' not rated'+(p+f?' (pass rate '+Math.round(100*p/(p+f))+'% of rated items)':''));});
+ L.push('','Failed items:');L.push(...(fails.length?fails:['None recorded']));L.push('','Note: automated tools catch only some issues; confirm with manual and assistive technology tests.');return L.join('\n');}
+$('#gen').onclick=()=>{const r=$('#rep');r.textContent=report();r.focus();};
+$('#cpy').onclick=async()=>{const t=report();$('#rep').textContent=t;try{await navigator.clipboard.writeText(t);$('#cpst').textContent='Report copied.';}catch(e){$('#cpst').textContent='Copy was blocked. Select the report text and copy it manually.';}};
+$('#dl').onclick=()=>{try{const t=report();$('#rep').textContent=t;const d=new Date(),n='access-studio-report-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.txt',u=URL.createObjectURL(new Blob([t],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$('#cpst').textContent='Report downloaded as '+n+'.';}catch(e){$('#cpst').textContent='Download was blocked. Use Copy report as text instead.';}};
+$('#prt').onclick=()=>{$('#rep').textContent=report();window.print();};
+
+/* ================= ADVANCED FEATURES ================= */
+/* ---------- Live butterfly theme (canvas, decorative, aria-hidden) ---------- */
+const cv=$('#bfly'),cx=cv.getContext('2d');let W=0,H=0,bf=[],raf=0,bon=false,mx=-999,my=-999;
+/* Realistic butterflies: wings are painted once per species (veins, margins, spots, eyespots), then flapped in two phases */
+const FW=new Path2D('M0,0 C.2,-.25 .62,-.72 1,-.74 C1.14,-.55 1.1,-.2 .84,0 C.5,.08 .2,.07 0,0Z'),HW=new Path2D('M0,.02 C.45,-.02 .82,.1 .8,.42 C.76,.74 .4,.88 .2,.72 C.05,.56 0,.3 0,.02Z'),TL=new Path2D('M.6,.72 C.7,.92 .72,1.12 .66,1.25 C.58,1.1 .5,.92 .38,.78Z');
+const SP=[{a:'#f28a1e',b:'#d9650a',v:'#1b0f08',m:'#1b0f08',d:'#fff'},{a:'#52b8ff',b:'#1665d8',v:'#0b2a66',m:'#0a1022',d:'#dfefff'},{a:'#ffe14d',b:'#f2b705',v:'#161208',m:'#161208',d:'#ffe14d',tail:1,eye:'#3b8fe0'},{a:'#b5381e',b:'#7a1c10',v:'#2a0d08',m:'#2a0d08',d:'#fff',eye:'#8fb8ff'},{a:'#9cc4ff',b:'#5b8fe6',v:'#334a7a',m:'#2b3350',d:'#fff'}];let SPR;
+function wing(sp,hd){const R=96,c=document.createElement('canvas');c.width=1.3*R;c.height=2.1*R;const x=c.getContext('2d');x.translate(0,.85*R);x.scale(R,R);const p=hd?HW:FW;
+ if(hd&&sp.tail){x.fillStyle=sp.m;x.fill(TL);}
+ const g=x.createLinearGradient(0,0,1,hd?.5:-.4);g.addColorStop(0,sp.b);g.addColorStop(.55,sp.a);g.addColorStop(1,sp.b);x.fillStyle=g;x.fill(p);x.save();x.clip(p);
+ x.strokeStyle=sp.v;x.lineWidth=.014;for(let i=0;i<9;i++){const t=(i/8-.5)*1.5+(hd?.45:-.4);x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(.5,t*.45,1.1,t);x.stroke();}
+ x.lineWidth=.08;x.strokeStyle=sp.m;x.stroke(p);x.setLineDash([.001,.075]);x.lineCap='round';x.lineWidth=.045;x.strokeStyle=sp.d;x.stroke(p);x.setLineDash([]);
+ if(sp.eye&&(hd||!sp.tail)){const e=hd?[.5,.38]:[.86,-.5];[[.12,sp.m],[.09,sp.eye],[.05,'#111']].forEach(([r,f])=>{x.fillStyle=f;x.beginPath();x.arc(e[0],e[1],r,0,6.3);x.fill();});x.fillStyle='#fff';x.beginPath();x.arc(e[0]-.02,e[1]-.02,.015,0,6.3);x.fill();}
+ x.restore();return c;}
+const still=()=>S.rm||matchMedia('(prefers-reduced-motion: reduce)').matches;
+function rs(){const D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;cx.setTransform(D,0,0,D,0,0);}
+function mkB(){return{k:Math.random()*SP.length|0,x:Math.random()*W,y:Math.random()*H,a:Math.random()*6.28,s:12+Math.random()*20,p:Math.random()*6.28,t:Math.random()*9,z:Math.random()*6.28,st:0,rt:0,turn:0,tt:0,amp:1.25};}
+function drawB(b){const s=b.s*(1+.07*Math.sin(b.z)),im=SPR[b.k],K='#1a1410';cx.save();cx.translate(b.x,b.y);cx.rotate(b.a+Math.PI/2);
+ for(const[i,lag]of[[1,.6],[0,0]])for(const m of[1,-1]){const fl=Math.cos((1+Math.sin(b.p-lag))/2*b.amp);cx.save();cx.globalAlpha=.78+.22*fl;cx.translate(0,-.1*s);cx.scale(m*fl,1);cx.drawImage(im[i],0,-.85*s,1.3*s,2.1*s);cx.restore();}
+ cx.fillStyle=K;cx.beginPath();cx.ellipse(0,s*.3,s*.07,s*.38,0,0,6.3);cx.fill();cx.beginPath();cx.ellipse(0,-s*.1,s*.1,s*.2,0,0,6.3);cx.fill();cx.beginPath();cx.arc(0,-s*.34,s*.075,0,6.3);cx.fill();
+ cx.strokeStyle=K;cx.lineWidth=Math.max(.7,s*.02);cx.beginPath();cx.moveTo(-s*.03,-s*.4);cx.quadraticCurveTo(-s*.12,-s*.75,-s*.3,-s*.88);cx.moveTo(s*.03,-s*.4);cx.quadraticCurveTo(s*.12,-s*.75,s*.3,-s*.88);cx.stroke();
+ for(const q of[-1,1]){cx.beginPath();cx.arc(q*s*.3,-s*.88,s*.035,0,6.3);cx.fill();}cx.restore();}
+function step(){try{cx.clearRect(0,0,W,H);const mv=!still();
+ for(const b of bf){if(mv){b.t+=.016;
+  if(b.st===0){b.tt-=.016;if(b.tt<=0){b.turn=(Math.random()-.5)*.14;b.tt=.3+Math.random()*1.2;}b.a+=b.turn*.5+Math.sin(b.t*2.1+b.k)*.02;
+   if(S.bf){const dx=mx-b.x,dy=my-b.y,d=Math.hypot(dx,dy);if(d<320&&d>30){let df=Math.atan2(dy,dx)-b.a;df=Math.atan2(Math.sin(df),Math.cos(df));b.a+=df*.05;}}
+   const sp=(.35+b.s/60)*S.bs*(.45+1.1*Math.max(0,Math.sin(b.p-.6)));b.x+=Math.cos(b.a)*sp;b.y+=Math.sin(b.a)*sp;
+   b.p+=(.3+.1*Math.sin(b.t*.7+b.k))*Math.min(S.bs,1.8);b.z+=.03;b.amp+=(1.25-b.amp)*.08;if(Math.random()<.0007){b.st=1;b.rt=3+Math.random()*5;}}
+  else{b.rt-=.016;b.p+=.05;b.amp+=(.55-b.amp)*.06;b.a+=Math.sin(b.t*.9)*.004;if(b.rt<=0||Math.hypot(mx-b.x,my-b.y)<90)b.st=0;}
+  if(b.x<-60)b.x=W+60;else if(b.x>W+60)b.x=-60;if(b.y<-60)b.y=H+60;else if(b.y>H+60)b.y=-60;}
+  drawB(b);}
+ if(bon&&mv&&!document.hidden)raf=requestAnimationFrame(step);}catch(e){bon=false;console.error(e);toast('Butterflies stopped because of a drawing error. Pick another theme or reload the page.',true);}}
+function bfRun(){cancelAnimationFrame(raf);if(!cx)return;if(!bon){cx.clearRect(0,0,W,H);return;}try{if(!SPR)SPR=SP.map(q=>[wing(q,0),wing(q,1)]);}catch(e){bon=false;toast('Butterflies could not be drawn in this browser.',true);return;}rs();while(bf.length<S.bn)bf.push(mkB());bf.length=S.bn;step();}
+window.onTheme=t=>{bon=t==='butterflies';bfRun();};
+addEventListener('resize',()=>{if(bon)bfRun();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)bfRun();});
+addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;if(S.rul)$('#ruler').style.top=(my-18)+'px';});
+document.addEventListener('focusin',e=>{if(S.rul&&e.target.getBoundingClientRect){const r=e.target.getBoundingClientRect();$('#ruler').style.top=(r.top+r.height/2-18)+'px';}});
+
+/* ---------- Personalization ---------- */
+const DEF={fs:100,ff:'',lh:1.6,ls:0,ws:0,mw:62,fw:3,ac:'',flt:'',rm:false,hl:false,cur:false,rul:false,bn:16,bs:1,bf:false};
+let LOADERR=false,SW=false;let S=Object.assign({},DEF);try{Object.assign(S,JSON.parse(localStorage.getItem('a11y-lab-s')||'{}'));}catch(e){LOADERR=true;}
+const PC=[['Text and reading',[
+ ['fs','Text size','range',80,200,10,'%'],
+ ['ff','Font','select',[['','System default'],['Verdana,Tahoma,sans-serif','Verdana (wide, clear letters)'],['Georgia,serif','Georgia (serif)'],['"Comic Sans MS","Chalkboard SE",cursive','Comic Sans (distinct letter shapes)'],['ui-monospace,Menlo,Consolas,monospace','Monospace']]],
+ ['lh','Line height','range',1.2,2.4,.1,''],['ls','Letter spacing','range',0,.2,.02,'em'],['ws','Word spacing','range',0,.4,.04,'em'],['mw','Content width','range',30,90,4,'rem']]],
+['Appearance, focus and motion',[
+ ['ac','Accent color','color'],['fw','Focus ring thickness','range',2,8,1,'px'],
+ ['flt','Color filter','select',[['','None'],['grayscale(1)','Grayscale'],['saturate(.4)','Low saturation'],['saturate(1.8)','High saturation']]],
+ ['hl','Highlight all links','check'],['cur','Large cursor','check'],['rul','Reading ruler (follows pointer and focus)','check'],['rm','Reduce motion (also pauses butterflies)','check']]],
+['Butterfly theme',[['bn','Number of butterflies','range',5,60,1,''],['bs','Flight speed','range',.3,3,.1,'x'],['bf','Butterflies drift toward the pointer','check']]]];
+function clean(o){const v=Object.assign({},DEF),bad=[];if(!o||typeof o!=='object'||Array.isArray(o))return{v,bad:['Settings must be a JSON object.']};const sch={};PC.forEach(([,cs])=>cs.forEach(c=>sch[c[0]]=c));
+ for(const k in o){if(!(k in DEF)){bad.push('"'+k+'" is not a setting, so it was ignored.');continue;}const c=sch[k],x=o[k],t=c[2];let ok=typeof x===typeof DEF[k];
+  if(ok&&t==='range'){if(!isFinite(x))ok=false;else{const y=Math.min(c[4],Math.max(c[3],x));if(y!==x)bad.push('"'+k+'" must be '+c[3]+' to '+c[4]+', so it was set to '+y+'.');v[k]=y;continue;}}
+  if(ok&&t==='select'&&!c[3].some(a=>a[0]===x))ok=false;if(ok&&t==='color'&&x&&!/^#[0-9a-f]{6}$/i.test(x))ok=false;
+  if(ok)v[k]=x;else bad.push('"'+k+'" has an invalid value, so it was ignored.');}return{v,bad};}
+{const L=clean(S);S=L.v;if(L.bad.length)LOADERR=true;}
+$('#pctl').innerHTML=PC.map(([h,cs])=>'<div class="card"><h3>'+h+'</h3>'+cs.map(([k,l,t,a,b,c,u])=>{const id='s_'+k;
+ if(t==='range')return '<div class="field"><label for="'+id+'">'+l+': <output data-o="'+k+'"></output>'+u+'</label><input type="range" id="'+id+'" data-k="'+k+'" min="'+a+'" max="'+b+'" step="'+c+'"></div>';
+ if(t==='select')return '<div class="field"><label for="'+id+'">'+l+'</label><select id="'+id+'" data-k="'+k+'">'+a.map(o=>'<option value="'+TE(o[0])+'">'+TE(o[1])+'</option>').join('')+'</select></div>';
+ if(t==='color')return '<div class="field"><label for="'+id+'">'+l+' (button text color is chosen automatically)</label><input type="color" id="'+id+'" data-k="'+k+'"> <button type="button" id="acr">Use theme color</button></div>';
+ return '<div class="field"><label><input type="checkbox" id="'+id+'" data-k="'+k+'"> '+l+'</label></div>';}).join('')+'</div>').join('');
+function apply(save=true){const r=document.documentElement,st=r.style;
+ st.setProperty('--fs',S.fs+'%');st.setProperty('--lh',S.lh);st.setProperty('--ls',S.ls+'em');st.setProperty('--ws',S.ws+'em');st.setProperty('--mw',S.mw+'rem');st.setProperty('--fw',S.fw+'px');st.setProperty('--flt',S.flt||'none');
+ if(S.ff){st.setProperty('--ff',S.ff);st.setProperty('--hf',S.ff);}else{st.removeProperty('--ff');st.removeProperty('--hf');}
+ if(S.ac){const f=ratio(S.ac,'#ffffff')>=ratio(S.ac,'#000000')?'#ffffff':'#000000';st.setProperty('--ac',S.ac);st.setProperty('--acfg',f);
+  $('#acm').textContent='Button text contrast with your accent color: '+(Math.floor(ratio(S.ac,f)*100)/100).toFixed(2)+':1.';}
+ else{st.removeProperty('--ac');st.removeProperty('--acfg');$('#acm').textContent='';}
+ r.classList.toggle('hl',S.hl);r.classList.toggle('bigcur',S.cur);r.classList.toggle('rm',S.rm);$('#ruler').style.display=S.rul?'block':'none';
+ $$('[data-k]').forEach(el=>{const v=S[el.dataset.k];if(el.type==='checkbox')el.checked=!!v;else el.value=(el.dataset.k==='ac'&&!v)?'#1967d2':v;});
+ $$('[data-o]').forEach(o=>o.textContent=S[o.dataset.o]);
+ if(save)try{localStorage.setItem('a11y-lab-s',JSON.stringify(S));}catch(e){if(!SW){SW=true;toast('This browser blocked saving. Settings work now but will not be remembered.',true);}}
+ bfRun();}
+$('#pctl').addEventListener('input',e=>{const el=e.target,k=el.dataset.k;if(!k)return;S[k]=el.type==='checkbox'?el.checked:el.type==='range'?+el.value:el.value;apply();});
+$('#pctl').addEventListener('click',e=>{if(e.target.id==='acr'){S.ac='';apply();}});
+const PRE={lowvision:{fs:150,lh:1.8,fw:6,hl:true,cur:true,mw:50},dyslexia:{ff:'Verdana,Tahoma,sans-serif',ls:.06,ws:.16,lh:1.9,mw:50,fs:110},calm:{rm:true,flt:'saturate(.4)',lh:1.8}};
+document.addEventListener('click',e=>{const p=e.target.dataset&&e.target.dataset.p;if(p){S=Object.assign({},DEF,PRE[p]);apply();$('#pst').textContent='Preset applied: '+e.target.textContent+'.';}
+ if(e.target.id==='preset-reset'){S=Object.assign({},DEF);apply();$('#pst').textContent='All personalization settings were reset.';}});
+$('#pshow').onclick=()=>{$('#pjson').value=JSON.stringify(S,null,1);$('#pst').textContent='Current settings shown below.';};
+$('#papp').onclick=()=>{const bx=$('#pjson'),er=$('#pjson-err');let o;if(!bx.value.trim()){bx.setAttribute('aria-invalid','true');er.textContent='Error: paste settings JSON first, or choose Show current settings.';bx.focus();return;}
+ try{o=JSON.parse(bx.value);}catch(x){bx.setAttribute('aria-invalid','true');er.textContent='Error: that is not valid JSON ('+x.message+'). Choose Show current settings to start from a working example.';bx.focus();return;}
+ const r=clean(o);S=r.v;apply();bx.removeAttribute('aria-invalid');er.textContent='';toast(r.bad.length?'Applied with '+r.bad.length+' fix'+(r.bad.length>1?'es':'')+': '+r.bad.join(' '):'Settings applied.',!!r.bad.length);};
+
+/* ---------- Voice commands ---------- */
+function go(n){selTab(tabs[n]);tabs[n].focus();}
+const goT=n=>{go(n);return 'Opened '+tabs[n].textContent.replace(/^\d\.\s*/,'');};
+const TABN={keyboard:0,aria:0,contrast:1,zoom:1,magnif:1,fix:2,workshop:2,report:3,audit:3,checklist:3,scanner:3,personal:4,custom:4,voice:5};
+const onOff=t=>!/\b(off|disable|hide|stop)\b/.test(t);
+function speak(m){if(!window.speechSynthesis){toast('This browser cannot read aloud.',true);return;}try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(m);u.lang=$('#vlang').value;u.onerror=e=>{if(e.error!=='canceled'&&e.error!=='interrupted')toast('Reading aloud failed ('+e.error+').',true);};speechSynthesis.speak(u);}catch(e){toast('Reading aloud failed: '+e.message,true);}}
+const CMD=[
+['Go to a tab','"go to contrast", "open report", "show voice", "go to personalization"',t=>{const m=t.match(/\b(?:go to|open|show|switch to)\b(.*)/);if(!m)return;const k=Object.keys(TABN).find(k=>m[1].includes(k));return k?goT(TABN[k]):0;}],
+['Next or previous tab','"next tab", "previous tab"',t=>{const i=tabs.findIndex(x=>x.getAttribute('aria-selected')==='true');if(/next tab/.test(t))return goT((i+1)%tabs.length);if(/(previous|last|back) tab/.test(t))return goT((i-1+tabs.length)%tabs.length);}],
+['Butterflies','"more butterflies", "fewer butterflies", "faster", "slower"',t=>{if(!/butterfl|faster|slower/.test(t))return;
+ if(/more/.test(t))S.bn=Math.min(60,S.bn+8);else if(/fewer|less/.test(t))S.bn=Math.max(5,S.bn-8);else if(/faster/.test(t))S.bs=Math.min(3,+(S.bs+.4).toFixed(1));else if(/slower/.test(t))S.bs=Math.max(.3,+(S.bs-.4).toFixed(1));else return;
+ apply();return 'Butterflies: '+S.bn+', speed '+S.bs;}],
+['Change theme','"dark mode", "light theme", "high contrast", "sepia theme", "ocean theme", "butterflies"',t=>{
+ const o=[...ts.options].find(o=>/butterfl/.test(t)?o.value==='butterflies':/high contrast/.test(t)?o.value==='contrast':new RegExp('\\b'+o.value+'\\b').test(t)&&/theme|mode|switch|use/.test(t));
+ if(!o)return;ts.value=o.value;setTheme();return 'Theme: '+o.text;}],
+['Text size','"increase text size", "make text smaller", "zoom in"',t=>{if(!/text|font|zoom|size/.test(t))return;
+ if(/bigger|larger|increase|enlarge|zoom in|\bup\b/.test(t))S.fs=Math.min(200,S.fs+10);else if(/smaller|decrease|reduce|shrink|zoom out|down/.test(t))S.fs=Math.max(80,S.fs-10);else return;apply();return 'Text size '+S.fs+'%';}],
+['Reduce motion','"reduce motion", "stop animation", "enable motion"',t=>{if(!/motion|animation/.test(t))return;S.rm=/reduce|stop|pause|less|off|disable/.test(t);apply();return 'Reduced motion '+(S.rm?'on':'off');}],
+['Reading aids','"reading ruler on", "highlight links", "large cursor off"',t=>{const k=/ruler/.test(t)?'rul':/link/.test(t)&&/highlight/.test(t)?'hl':/cursor/.test(t)?'cur':0;if(!k)return;S[k]=onOff(t);apply();return {rul:'Reading ruler',hl:'Link highlight',cur:'Large cursor'}[k]+(S[k]?' on':' off');}],
+['Scroll','"scroll down", "scroll up", "scroll to top", "scroll to bottom"',t=>{if(/scroll to top|back to top/.test(t)){scrollTo({top:0,behavior:'smooth'});return 'Top of page';}if(/scroll to bottom/.test(t)){scrollTo({top:1e6,behavior:'smooth'});return 'Bottom of page';}
+ const m=t.match(/(scroll|page) (down|up)/);if(!m)return;scrollBy({top:(m[2]==='down'?1:-1)*innerHeight*.8,behavior:'smooth'});return 'Scrolled '+m[2];}],
+['Read aloud','"read page", "read aloud", "stop reading"',t=>{if(/^(stop|be quiet|silence)/.test(t)){window.speechSynthesis&&speechSynthesis.cancel();return 'Stopped reading';}
+ if(/read (the )?(page|this|aloud|panel)/.test(t)){const s=$$('main > section').find(x=>!x.hidden);speak(s.innerText);return 'Reading this tab aloud';}}],
+['Dialog','"open dialog", "close dialog"',t=>{if(/open (the )?dialog/.test(t)){selTab(tabs[0]);if(dlg.open)return 'The dialog is already open';$('#openDlg').click();return 'Dialog opened';}if(/close (the )?dialog/.test(t)){if(dlg.open)dlg.close();return 'Dialog closed';}}],
+['Audit report','"generate report", "copy report", "print report"',t=>{if(!/report/.test(t)||/^(go to|open|show)/.test(t))return;selTab(tabs[3]);if(/generate|create|build/.test(t)){$('#gen').click();return 'Report generated';}if(/copy/.test(t)){$('#cpy').click();return 'Copying report';}if(/print/.test(t)){$('#prt').click();return 'Printing report';}}],
+['Reset settings','"reset settings"',t=>{if(!/reset/.test(t))return;S=Object.assign({},DEF);apply();return 'Personalization reset';}],
+['Stop the microphone','"stop listening"',t=>{if(!/stop listening/.test(t))return;stopMic();return 'Microphone off';}],
+['Help','"help", "what can I say"',t=>{if(!/help|what can i say|commands/.test(t))return;return goT(5)+'. The command list is on this tab.';}]];
+$('#vhelp').innerHTML=CMD.map(c=>'<tr><td>'+TE(c[0])+'</td><td>'+TE(c[1])+'</td></tr>').join('');
+function vsay(m,err){$('#vlive').textContent=m;toast(m,err);}
+function exec(txt){const t=txt.toLowerCase().replace(/[.,!?]/g,'').trim();if(!t)return;let msg=0;
+ for(const c of CMD){try{msg=c[2](t);}catch(e){console.error(e);msg='That command failed: '+e.message;}if(msg)break;}
+ const li=document.createElement('li');li.textContent='"'+txt.trim()+'" -> '+(msg||'not recognized');$('#vlog').prepend(li);while($('#vlog').children.length>12)$('#vlog').lastChild.remove();
+ const out=msg||'Sorry, not recognized. Say help for the list.';vsay(out);if($('#vfb').checked&&!/Reading this tab/.test(out))speak(out);}
+$('#vform').onsubmit=e=>{e.preventDefault();exec($('#vtxt').value);$('#vtxt').value='';};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,lis=false;
+$('#vsup').textContent=SR?'Speech recognition is available in this browser. Your browser asks for microphone permission the first time.':'Speech recognition is not supported in this browser. Use the typed command box, or try Chrome or Edge.';
+function setL(v){lis=v;const b=$('#vmic');b.setAttribute('aria-pressed',v);b.textContent=v?'Stop listening':'Start listening';if(!v)$('#vint').textContent='';}
+const VERR={'no-speech':0,'aborted':0,'not-allowed':'Microphone access is blocked. Allow it in your browser settings, or use the typed command box.','service-not-allowed':'This browser does not allow speech recognition here. Use the typed command box.','audio-capture':'No microphone was found. Connect one, or use the typed command box.','network':'Speech recognition needs an internet connection. Check it and try again.','language-not-supported':'That language is not supported for voice. Choose another language.'};let rst=[];
+function startMic(){if(!SR){vsay('Speech recognition is not supported here. Use the typed command box.',1);return;}
+ try{rec=new SR();}catch(e){vsay('Could not start speech recognition: '+e.message,1);return;}
+ rec.lang=$('#vlang').value;rec.continuous=true;rec.interimResults=true;
+ rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal){$('#vint').textContent='';exec(r[0].transcript);}else $('#vint').textContent='Hearing: '+r[0].transcript;}};
+ rec.onerror=e=>{const m=VERR[e.error];if(m===0){if(e.error==='no-speech')$('#vint').textContent='No speech heard yet. Still listening.';return;}stopMic();vsay(m||'Microphone problem ('+e.error+'). Try again, or use the typed command box.',1);};
+ rec.onend=()=>{if(!lis)return;const n=Date.now();rst=rst.filter(t=>n-t<5000);rst.push(n);if(rst.length>4){stopMic();vsay('Voice recognition keeps stopping. Turn the microphone on again to retry.',1);return;}try{rec.start();}catch(e){stopMic();vsay('Could not restart the microphone.',1);}};
+ try{rec.start();setL(true);vsay('Listening. Say help to hear what you can ask.');}catch(e){setL(false);vsay('Could not start the microphone: '+e.message,1);}}
+function stopMic(){lis=false;if(rec){rec.onend=null;try{rec.stop();}catch(e){}}setL(false);}
+$('#vmic').onclick=()=>lis?(stopMic(),vsay('Microphone off.')):startMic();
+$('#vlang').onchange=()=>{if(lis){stopMic();startMic();}};
+$('#hform').onsubmit=e=>{e.preventDefault();exec($('#hq').value);$('#hq').value='';};
+document.addEventListener('keydown',e=>{if(!e.altKey||e.ctrlKey||e.metaKey)return;
+ if(e.key.toLowerCase()==='v'){e.preventDefault();$('#vmic').click();}else if(/^[1-6]$/.test(e.key)){e.preventDefault();go(+e.key-1);}});
+
+/* ---------- HTML scanner (what markup alone can reveal) ---------- */
+function scan(html){const d=new DOMParser().parseFromString(html,'text/html'),R=[],add=(sc,m)=>R.push('SC '+sc+': '+m);
+ d.querySelectorAll('img:not([alt])').forEach(()=>add('1.1.1','Image has no alt attribute.'));
+ d.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]),select,textarea').forEach(el=>{const lab=(el.id&&d.querySelector('label[for="'+CSS.escape(el.id)+'"]'))||el.closest('label')||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby');if(!lab)add('3.3.2','Form field has no label'+(el.placeholder?' (placeholder only: "'+el.placeholder+'")':'')+'.');});
+ d.querySelectorAll('button,[role=button]').forEach(b=>{if(!(b.textContent.trim()||b.getAttribute('aria-label')||b.getAttribute('aria-labelledby')||b.title))add('4.1.2','Button has no accessible name.');});
+ d.querySelectorAll('a').forEach(a=>{const t=a.textContent.trim().toLowerCase();if(!t&&!a.getAttribute('aria-label'))add('2.4.4','Link has no text.');else if(/^(click here|here|read more|more|link)$/.test(t))add('2.4.4','Vague link text: "'+t+'".');if(!a.hasAttribute('href')&&!a.getAttribute('role'))add('2.1.1','Anchor without href is not keyboard focusable.');});
+ d.querySelectorAll('[onclick]:not(a):not(button):not(input):not([role=button]):not([tabindex])').forEach(e=>add('2.1.1','<'+e.tagName.toLowerCase()+'> has a click handler but is not focusable or exposed as a control.'));
+ d.querySelectorAll('[tabindex]').forEach(e=>{if(+e.getAttribute('tabindex')>0)add('2.4.3','Positive tabindex ('+e.getAttribute('tabindex')+').');});
+ let last=0;d.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h=>{const n=+h.tagName[1];if(last&&n>last+1)add('1.3.1','Heading level jumps from h'+last+' to h'+n+'.');last=n;});
+ d.querySelectorAll('table').forEach(t=>{if(!t.querySelector('th'))add('1.3.1','Table has no header cells (th).');});
+ const ids={};d.querySelectorAll('[id]').forEach(e=>{ids[e.id]=(ids[e.id]||0)+1;});Object.keys(ids).forEach(k=>{if(ids[k]>1)add('4.1.1','Duplicate id "'+k+'".');});
+ if(/outline\s*:\s*(none|0)\b/i.test(html))add('2.4.7','CSS removes the focus outline.');
+ if(/<html/i.test(html)&&!/<html[^>]*\blang=/i.test(html))add('3.1.1','html element has no lang attribute.');
+ return R;}
+$('#scgo').onclick=()=>{const v=$('#scin').value.trim();if(!v){$('#scsum').textContent='Paste some HTML first.';$('#scout').innerHTML='';return;}
+ const R=scan(v);$('#scsum').textContent=R.length?R.length+' potential issue'+(R.length>1?'s':'')+' found. Confirm each manually.':'No issues found by this scanner. That does not prove the markup is accessible.';
+ $('#scout').innerHTML=R.map(x=>'<li>'+TE(x)+'</li>').join('');};
+$('#scload').onclick=()=>{$('#scin').value=sample(false,'sc');$('#scin').focus();};
+
+/* ---------- Start up ---------- */
+apply(false);window.onTheme(ts.value);if(LOADERR)toast('Some saved settings were invalid, so defaults were used for them.',true);
+</script>
+</body>
+</html>
